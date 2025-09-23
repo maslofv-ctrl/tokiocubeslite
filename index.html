@@ -1,98 +1,176 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Игровые Кубики</title>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background-color: #f0f0f0;
-        }
-        .cubes-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-        .cube {
-            width: 100px;
-            height: 100px;
-            margin: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 50px;
-            font-weight: bold;
-            transition: transform 0.2s;
-            background-color: #000000;
-            color: #ffffff;
-            border-radius: 5px;
-        }
-        .cube.selected {
-            transform: translateY(-25px);
-            background-color: #1ac728;
-        }
-        .buttons-container {
-            display: flex;
-        }
-        button {
-            margin: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Игровые Кубики (SVG)</title>
+  <style>
+    :root{
+      --cube-size: 100px;
+      --icon-size: 56px; /* размер SVG внутри кубика */
+      --cube-bg: #2c2c2c;
+      --cube-color: #fff;
+      --selected-bg-start: #1ac728;
+      --selected-bg-end: #4be95a;
+    }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+      background: linear-gradient(135deg,#e0eafc,#cfdef3);
+    }
+
+    h1{ margin-bottom:20px; color:#213; }
+
+    .cubes-container{
+      display:flex;
+      gap:14px;
+      flex-wrap:wrap;
+      justify-content:center;
+      margin-bottom:20px;
+    }
+
+    .cube{
+      width:var(--cube-size);
+      height:var(--cube-size);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:var(--cube-bg);
+      color:var(--cube-color);
+      font-size:50px;
+      font-weight:700;
+      border-radius:14px;
+      box-shadow:0 6px 14px rgba(0,0,0,.25);
+      cursor:pointer;
+      transition: transform .22s ease, box-shadow .22s ease, background .22s ease;
+      user-select:none;
+    }
+
+    .cube:hover{ transform:translateY(-6px) scale(1.03); }
+
+    .cube.selected{
+      transform: translateY(-18px) scale(1.03);
+      background: linear-gradient(135deg, var(--selected-bg-start), var(--selected-bg-end));
+      box-shadow: 0 12px 28px rgba(26,199,40,0.32);
+      color: #062a06; /* опционально: другой цвет текста для контраста */
+    }
+
+    /* если внутри кубика SVG — делаем его адаптивным */
+    .cube svg {
+      width: var(--icon-size);
+      height: var(--icon-size);
+      display:block;
+      pointer-events:none; /* чтобы клик попадал на .cube */
+    }
+
+    /* можно менять внешний вид линий/заливки через текущий цвет кубика */
+    .icon-fill { fill: currentColor; }
+    .icon-stroke { stroke: currentColor; stroke-width: 0; }
+
+    .buttons-container{ display:flex; gap:12px; }
+    button{
+      padding:10px 18px;
+      border-radius:999px;
+      border:none;
+      background: linear-gradient(135deg,#667eea,#764ba2);
+      color:white;
+      font-weight:600;
+      cursor:pointer;
+    }
+     button:hover{
+      box-shadow:0 6px 14px rgba(0,0,0,.18);
+    }   
+  </style>
 </head>
 <body>
 
-    <div class="cubes-container">
-        <div class="cube" onclick="toggleSelect(this)"></div>
-        <div class="cube" onclick="toggleSelect(this)"></div>
-        <div class="cube" onclick="toggleSelect(this)"></div>
-        <div class="cube" onclick="toggleSelect(this)"></div>
-        <div class="cube" onclick="toggleSelect(this)"></div>
-        <div class="cube" onclick="toggleSelect(this)"></div>
-    </div>
+  <h1 style="margin-bottom: 80px;">Повелитель Токио (Lite)</h1>
 
-    <div class="buttons-container">
-        <button id="roll-button" onclick="rollAll()">Запустить</button>
-        <button id="reroll-button" onclick="rerollSelected()">Переброс</button>
-    </div>
+  <div class="cubes-container" id="cubes">
+    <div class="cube" onclick="toggleSelect(this)"></div>
+    <div class="cube" onclick="toggleSelect(this)"></div>
+    <div class="cube" onclick="toggleSelect(this)"></div>
+    <div class="cube" onclick="toggleSelect(this)"></div>
+    <div class="cube" onclick="toggleSelect(this)"></div>
+    <div class="cube" onclick="toggleSelect(this)"></div>
+  </div>
 
-    <script>
-        const cubes = document.querySelectorAll('.cube');
+  <div class="buttons-container">
+    <button onclick="rollAll()">Запустить</button>
+    <button onclick="rerollSelected()">Переброс</button>
+  </div>
 
-        function rollAll() {
-            cubes.forEach(cube => {
-                cube.dataset.value = getRandomValue();
-                cube.textContent = cube.dataset.value;
-            });
+  <script>
+    const cubes = document.querySelectorAll('.cube');
+
+    // --- SVG строки (используют currentColor, так что цвет наследуется от .cube)
+    const svgHeart = `
+      <svg viewBox="0 0 24 24" aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg">
+        <path class="icon-fill" d="M12 21s-7.2-4.6-9.2-7.1C1.2 11.9 2.1 7.6 5.6 6c1.9-.9 4.1-.1 6.4 2 2.3-2.1 4.5-2.9 6.4-2 3.5 1.6 4.4 5.9 2.8 7.9C19.2 16.4 12 21 12 21z"></path>
+      </svg>
+    `;
+
+    const svgBoom = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="32" viewBox="0 0 36 32" fill="currentColor">
+        <path d="M8.25 20.69C6.58 23.72 20.24 39.29 25.31 27.86c.88-2.01 1.53-2.38 2.98-3.71 4.11-3.8-4.39-8.22-7.2-9.21-3.91-1.36-7.26-2.98-9.44 1.9.99.62 2.38.71 2.83 1.93-.91-.11-2.49-.79-3.26-.82-.79-.04-2.43 2.03-2.93 2.75Z"/>
+        <path d="M23.33 14.2c6.94 2.1 4.22-9.58 2.81-12.98-2.13 2.1-8.54 11.25-2.81 12.98Z"/>
+        <path d="M16.44 12.05c1.11.14 1.93-.03 2.32-.94.37-.82.23-2.04 0-3.23-.56-3.15-1.24-4.76-2.32-7.88-.85 3.86-4.99 11.37 0 12.05Z"/>
+        <path d="M4.99 20.04c1.81-.11 3.57-1.45 3.37-3.15-.03-.43-.17-.82-.45-1.28-.94-.82-5.47-3-7.91-3.57.62 2.45 3.12 7.18 5 8Z"/>
+        <path d="M28.6 14.85c-.4.62-.34 1.47.03 2.15 1.11 2.1 4.05 2.07 5.22-.4.62-1.33 1.36-3.63 1.4-5.16-1.28.52-6.07 2.56-6.65 3.41Z"/>
+      </svg>
+    `;
+
+    // Вспомогательная функция для установки значения в кубик
+    function setCubeValue(cube, value) {
+      // очищаем дата-атрибут
+      cube.dataset.value = value;
+      if (value === 'heart') {
+        cube.innerHTML = svgHeart;
+        cube.setAttribute('aria-label', 'сердечко');
+      } else if (value === 'boom') {
+        cube.innerHTML = svgBoom;
+        cube.setAttribute('aria-label', 'взрыв');
+      } else {
+        // число — вставляем как текст
+        cube.textContent = String(value);
+        cube.removeAttribute('aria-label');
+      }
+    }
+
+    function getRandomValue() {
+      const values = [1, 2, 3, 4, 'heart', 'boom'];
+      return values[Math.floor(Math.random() * values.length)];
+    }
+
+    function rollAll() {
+      cubes.forEach(cube => {
+        const v = getRandomValue();
+        setCubeValue(cube, v);
+        cube.classList.remove('selected');
+      });
+    }
+
+    function rerollSelected() {
+      cubes.forEach(cube => {
+        if (cube.classList.contains('selected')) {
+          setCubeValue(cube, getRandomValue());
+          cube.classList.remove('selected');
         }
+      });
+    }
 
-        function rerollSelected() {
-            cubes.forEach(cube => {
-                if (cube.classList.contains('selected')) {
-                    cube.dataset.value = getRandomValue();
-                    cube.textContent = cube.dataset.value;
-                    cube.classList.remove('selected');
-                }
-            });
-        }
+    function toggleSelect(cube) {
+      cube.classList.toggle('selected');
+    }
 
-        function toggleSelect(cube) {
-            cube.classList.toggle('selected');
-        }
-
-        function getRandomValue() {
-            const values = [1, 2, 3, 4, '❤️', '💥'];
-            return values[Math.floor(Math.random() * values.length)];
-        }
-    </script>
-
+    // при загрузке — бросаем
+    rollAll();
+  </script>
 </body>
 </html>
