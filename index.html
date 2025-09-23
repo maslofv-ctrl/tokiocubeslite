@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Игровые Кубики (SVG)</title>
+  <title>Игровые Кубики</title>
   <style>
     :root{
       --cube-size: 100px;
@@ -58,22 +58,20 @@
       transform: translateY(-18px) scale(1.03);
       background: linear-gradient(135deg, var(--selected-bg-start), var(--selected-bg-end));
       box-shadow: 0 12px 28px rgba(26,199,40,0.32);
-      color: #062a06; /* опционально: другой цвет текста для контраста */
+      color: #062a06;
     }
 
-    /* если внутри кубика SVG — делаем его адаптивным */
     .cube svg {
       width: var(--icon-size);
       height: var(--icon-size);
       display:block;
-      pointer-events:none; /* чтобы клик попадал на .cube */
+      pointer-events:none;
     }
 
-    /* можно менять внешний вид линий/заливки через текущий цвет кубика */
     .icon-fill { fill: currentColor; }
     .icon-stroke { stroke: currentColor; stroke-width: 0; }
 
-    .buttons-container{ display:flex; gap:12px; }
+    .buttons-container{ display:flex; gap:12px; margin-top:20px; }
     button{
       padding:25px 30px;
       border-radius:50px;
@@ -84,14 +82,23 @@
       font-weight:600;
       cursor:pointer;
     }
-     button:hover{
+    button:hover{
       box-shadow:0 6px 14px rgba(0,0,0,.18);
     }   
+
+    .attempts {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: 600;
+      color: #213;
+    }
   </style>
 </head>
 <body>
 
-  <h1 style="margin-bottom: 80px;">Повелитель Токио <br>(Lite)</h1>
+  <h1 >Повелитель Токио</h1>
+
+    <div style="margin-bottom: 60px;" class="attempts" id="attempts">Осталось попыток: 2</div>
 
   <div class="cubes-container" id="cubes">
     <div class="cube" onclick="toggleSelect(this)"></div>
@@ -107,10 +114,13 @@
     <button onclick="rerollSelected()">Переброс</button>
   </div>
 
+
+
   <script>
     const cubes = document.querySelectorAll('.cube');
+    const attemptsEl = document.getElementById('attempts');
+    let rerollAttempts = 2;
 
-    // --- SVG строки (используют currentColor, так что цвет наследуется от .cube)
     const svgHeart = `
       <svg viewBox="0 0 24 24" aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg">
         <path class="icon-fill" d="M12 21s-7.2-4.6-9.2-7.1C1.2 11.9 2.1 7.6 5.6 6c1.9-.9 4.1-.1 6.4 2 2.3-2.1 4.5-2.9 6.4-2 3.5 1.6 4.4 5.9 2.8 7.9C19.2 16.4 12 21 12 21z"></path>
@@ -127,9 +137,7 @@
       </svg>
     `;
 
-    // Вспомогательная функция для установки значения в кубик
     function setCubeValue(cube, value) {
-      // очищаем дата-атрибут
       cube.dataset.value = value;
       if (value === 'heart') {
         cube.innerHTML = svgHeart;
@@ -138,7 +146,6 @@
         cube.innerHTML = svgBoom;
         cube.setAttribute('aria-label', 'взрыв');
       } else {
-        // число — вставляем как текст
         cube.textContent = String(value);
         cube.removeAttribute('aria-label');
       }
@@ -151,23 +158,32 @@
 
     function rollAll() {
       cubes.forEach(cube => {
-        const v = getRandomValue();
-        setCubeValue(cube, v);
+        setCubeValue(cube, getRandomValue());
         cube.classList.remove('selected');
       });
+      rerollAttempts = 2;
+      updateAttempts();
     }
 
     function rerollSelected() {
-      cubes.forEach(cube => {
-        if (cube.classList.contains('selected')) {
-          setCubeValue(cube, getRandomValue());
-          cube.classList.remove('selected');
-        }
-      });
+      if (rerollAttempts > 0) {
+        cubes.forEach(cube => {
+          if (cube.classList.contains('selected')) {
+            setCubeValue(cube, getRandomValue());
+            cube.classList.remove('selected');
+          }
+        });
+        rerollAttempts--;
+        updateAttempts();
+      }
     }
 
     function toggleSelect(cube) {
       cube.classList.toggle('selected');
+    }
+
+    function updateAttempts() {
+      attemptsEl.textContent = `Осталось попыток: ${rerollAttempts}`;
     }
 
     // при загрузке — бросаем
