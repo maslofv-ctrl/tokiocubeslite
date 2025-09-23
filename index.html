@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Игровые Кубики</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .cubes-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .cube {
+            width: 100px;
+            height: 100px;
+            margin: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 50px;
+            font-weight: bold;
+            transition: transform 0.2s;
+            background-color: #000000;
+            color: #ffffff;
+            border-radius: 5px;
+        }
+        .cube.selected {
+            transform: translateY(-25px);
+            background-color: #1ac728;
+        }
+        .buttons-container {
+            display: flex;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="cubes-container">
+        <div class="cube" onclick="toggleSelect(this)"></div>
+        <div class="cube" onclick="toggleSelect(this)"></div>
+        <div class="cube" onclick="toggleSelect(this)"></div>
+        <div class="cube" onclick="toggleSelect(this)"></div>
+        <div class="cube" onclick="toggleSelect(this)"></div>
+        <div class="cube" onclick="toggleSelect(this)"></div>
+    </div>
+
+    <div class="buttons-container">
+        <button id="roll-button" onclick="rollAll()">Запустить</button>
+        <button id="reroll-button" onclick="rerollSelected()">Переброс</button>
+    </div>
+
+    <script>
+        const cubes = document.querySelectorAll('.cube');
+
+        function rollAll() {
+            cubes.forEach(cube => {
+                cube.dataset.value = getRandomValue();
+                cube.textContent = cube.dataset.value;
+            });
+        }
+
+        function rerollSelected() {
+            cubes.forEach(cube => {
+                if (cube.classList.contains('selected')) {
+                    cube.dataset.value = getRandomValue();
+                    cube.textContent = cube.dataset.value;
+                    cube.classList.remove('selected');
+                }
+            });
+        }
+
+        function toggleSelect(cube) {
+            cube.classList.toggle('selected');
+        }
+
+        function getRandomValue() {
+            const values = [1, 2, 3, 4, '❤️', '💥'];
+            return values[Math.floor(Math.random() * values.length)];
+        }
+    </script>
+
+</body>
+</html>
