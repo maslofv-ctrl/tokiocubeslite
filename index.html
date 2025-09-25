@@ -84,6 +84,9 @@
     }
     button:hover{
       box-shadow:0 6px 14px rgba(0,0,0,.18);
+    }
+    button.btn_green {
+      background: linear-gradient(135deg,#3ae65f,#0d9506);
     }   
 
     .attempts {
@@ -95,6 +98,9 @@
   </style>
 </head>
 <body>
+    <div class="buttons-container" style="margin-bottom: 20px;">
+    <button onclick="rollAll()">Запустить</button>
+  </div>
 
   <h1 >Повелитель Токио</h1>
 
@@ -110,8 +116,7 @@
   </div>
 
   <div class="buttons-container">
-    <button onclick="rollAll()">Запустить</button>
-    <button onclick="rerollSelected()">Переброс</button>
+    <button class="btn_green" onclick="rerollSelected()">Переброс</button>
   </div>
 
 
